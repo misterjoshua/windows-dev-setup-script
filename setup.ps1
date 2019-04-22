@@ -69,13 +69,13 @@ $VerbosePreference = "Continue"
 
 Initialize-Setup
 Test-Confirmation
-Install-Chocolatey
 
 Initialize-Symlinks @(
     @("$home\.ssh", "$configPath\ssh"),
     @("$home\.aws", "$configPath\aws")
 )
 
+Install-Chocolatey
 Install-ChocolateyPackages @(
     # Terminals
     "putty.install",
