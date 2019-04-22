@@ -77,21 +77,22 @@ Initialize-Symlinks @(
 
 Install-Chocolatey
 Install-ChocolateyPackages @(
-    # Terminals
-    "putty.install",
-    "winscp.install",
-
     # Frameworks
     "golang",
     "jdk11",
     "jdk8",
-    "nodejs.install",
+    "nodejs",
     "python",
 
     # Dev tools
+    "datagrip",
     "git",
+    "goland",
     "gradle",
+    "intellijidea-ultimate",
     "jetbrainstoolbox",
+    "pycharm-professional",
+    "rider"
     "vscode",
 
     # Deployment tools
@@ -105,8 +106,10 @@ Install-ChocolateyPackages @(
     "terraform",
 
     # Utilities
-    "7zip.install",
-    "keepass.install"
+    "7zip",
+    "keepass",
+    "putty",
+    "winscp"
 )
 
 Write-Host "Installing Azure PowerShell module"
