@@ -85,14 +85,9 @@ Install-ChocolateyPackages @(
     "python",
 
     # Dev tools
-    "datagrip",
     "git",
-    "goland",
     "gradle",
-    "intellijidea-ultimate",
     "jetbrainstoolbox",
-    "pycharm-professional",
-    "rider"
     "vscode",
 
     # Deployment tools
