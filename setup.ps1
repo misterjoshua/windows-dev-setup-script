@@ -10,7 +10,11 @@ function Initialize-Setup {
         exit 0
     }
     
-    $script:configPath = Resolve-Path $PSScriptRoot
+    if ($PSScriptRoot) {
+        $script:configPath = Resolve-Path $PSScriptRoot
+    } else {
+        $script:configPath = Resolve-Path .
+    }
 }
 
 function Test-Confirmation {
@@ -91,13 +95,14 @@ Install-ChocolateyPackages @(
     "vscode",
 
     # Deployment tools
-    "terraform",
-    "packer",
-    "heroku-cli",
-    "docker-desktop",
-    "azure-cli",
-    "awstools.powershell",
     "awscli",
+    "awstools.powershell",
+    "azure-cli",
+    "docker-desktop",
+    "kubernetes-helm",
+    "heroku-cli",
+    "packer",
+    "terraform",
 
     # Utilities
     "7zip.install",
