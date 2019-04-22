@@ -1,5 +1,6 @@
 param(
-    [switch] $Confirm
+    [switch] $Confirm,
+    [switch] $Chat
 )
 
 function Initialize-Setup {
@@ -46,8 +47,8 @@ function Initialize-Symlinks ($Symlinks) {
 
 function Install-ChocolateyPackages($Packages) {
     $Packages | ForEach-Object {
-        Write-Host "Installing choco package $_" -ForegroundColor Cyan
-        choco install -y $_
+        Write-Host "`n`n-= Installing choco package $_ =-`n" -ForegroundColor Cyan
+        choco install -r -y $_
     }
 }
 
@@ -70,7 +71,7 @@ Initialize-Symlinks @(
 Install-ChocolateyPackages @(
     "putty.install", "winscp.install",
     "jdk11", "jdk8","nodejs.install","python",
-    "gradle","vscode", "jetbrainstoolbox",
+    "git","gradle","vscode", "jetbrainstoolbox",
     "heroku-cli","awscli","awstools.powershell","azure-cli",
     "docker-desktop",
     "packer","terraform"
@@ -78,11 +79,13 @@ Install-ChocolateyPackages @(
 
 Install-Module -Name Az -AllowClobber -Scope CurrentUser -Force
 
-# Chat programs.
-# Install-ChocolateyPackages @(
-#     "slack","skype","telegram.install","discord.install"
-# )
+if ($Chat) {
+    # Chat programs.
+    Install-ChocolateyPackages @(
+        "slack","skype","telegram.install","discord.install"
+    )
+}
 
 refreshenv
 
-npm install -g yarn
+npm install -g yarn create-react-app
