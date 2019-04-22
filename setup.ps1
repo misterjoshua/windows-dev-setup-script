@@ -112,9 +112,6 @@ Install-ChocolateyPackages @(
     "winscp"
 )
 
-Write-Host "Installing Azure PowerShell module"
-Install-Module -Name Az -AllowClobber -Scope CurrentUser -Force
-
 if ($Chat) {
     # Chat programs.
     Install-ChocolateyPackages @(
@@ -122,6 +119,9 @@ if ($Chat) {
         "skype"
     )
 }
+
+Write-Host "Installing Azure PowerShell module"
+Install-Module -Name Az -AllowClobber -Scope CurrentUser -Force
 
 refreshenv
 
