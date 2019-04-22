@@ -39,7 +39,7 @@ function Initialize-Symlinks ($Symlinks) {
         
         if (-not (Test-Path $targetPath)) {
             Write-Host "Creating targetPath $targetPath"
-            New-Item -ItemType Directory $targetPath
+            New-Item -ItemType Directory -Path $targetPath -Force
         }
 
         if (-not ($item = Get-Item $sourcePath -ErrorAction SilentlyContinue)) {
