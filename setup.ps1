@@ -33,15 +33,18 @@ function Initialize-Symlinks ($Symlinks) {
         $sourcePath = $_[0]
         $targetPath = $_[1]
         
-        if (Test-Path $targetPath) {
-            if (-not ($item = Get-Item $sourcePath -ErrorAction SilentlyContinue)) {
-                Write-Host "Deleting sourcePath $sourcePath"
-                $item.Delete()
-            }
-
-            Write-Host "Linking $sourcePath => $targetPath"
-            New-Item -ItemType SymbolicLink -Path $sourcePath -Target $targetPath -Force
+        if (-not (Test-Path $targetPath)) {
+            Write-Host "Creating targetPath $targetPath"
+            New-Item -ItemType Directory $targetPath
         }
+
+        if (-not ($item = Get-Item $sourcePath -ErrorAction SilentlyContinue)) {
+            Write-Host "Deleting sourcePath $sourcePath"
+            $item.Delete()
+        }
+
+        Write-Host "Linking $sourcePath => $targetPath"
+        New-Item -ItemType SymbolicLink -Path $sourcePath -Target $targetPath -Force
     }
 }
 
