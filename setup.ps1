@@ -42,7 +42,7 @@ function Initialize-Symlinks ($Symlinks) {
             New-Item -ItemType Directory -Path $targetPath -Force
         }
 
-        if (-not ($item = Get-Item $sourcePath -ErrorAction SilentlyContinue)) {
+        if ($item = Get-Item $sourcePath -ErrorAction SilentlyContinue) {
             Write-Host "Deleting sourcePath $sourcePath"
             $item.Delete()
         }
