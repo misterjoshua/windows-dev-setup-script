@@ -69,23 +69,50 @@ Initialize-Symlinks @(
 )
 
 Install-ChocolateyPackages @(
-    "putty.install", "winscp.install",
-    "jdk11", "jdk8","nodejs.install","python",
-    "git","gradle","vscode", "jetbrainstoolbox",
-    "heroku-cli","awscli","awstools.powershell","azure-cli",
+    # Terminals
+    "putty.install",
+    "winscp.install",
+
+    # Frameworks
+    "golang",
+    "jdk11",
+    "jdk8",
+    "nodejs.install",
+    "python",
+
+    # Dev tools
+    "git",
+    "gradle",
+    "jetbrainstoolbox",
+    "vscode",
+
+    # Deployment tools
+    "terraform",
+    "packer",
+    "heroku-cli",
     "docker-desktop",
-    "packer","terraform"
+    "azure-cli",
+    "awstools.powershell",
+    "awscli",
+
+    # Utilities
+    "7zip.install",
+    "keepass.install"
 )
 
+Write-Host "Installing Azure PowerShell module"
 Install-Module -Name Az -AllowClobber -Scope CurrentUser -Force
 
 if ($Chat) {
     # Chat programs.
     Install-ChocolateyPackages @(
-        "slack","skype","telegram.install","discord.install"
+        "slack",
+        "skype"
     )
 }
 
 refreshenv
 
+# NodeJS setup.
+Write-Host "Setting up nodejs"
 npm install -g yarn create-react-app
