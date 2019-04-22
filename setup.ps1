@@ -13,7 +13,7 @@ function Initialize-Setup {
     $script:configPath = Resolve-Path $PSScriptRoot
 }
 
-function Get-Confirmation {
+function Test-Confirmation {
     if (-not $Confirm) {
         Write-Host "Setup script will nuke userdir things linking them to $configPath. Type yes to continue." -ForegroundColor Red
         $confirm = Read-Host -Prompt "Type yes to confirm:"
@@ -64,6 +64,7 @@ $ErrorActionPreference = "Stop"
 $VerbosePreference = "Continue"
 
 Initialize-Setup
+Test-Confirmation
 Install-Chocolatey
 
 Initialize-Symlinks @(
