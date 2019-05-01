@@ -9,7 +9,7 @@ function Initialize-Setup {
         Start-Process powershell -Verb runAs -ArgumentList $arguments
         exit 0
     }
-    
+
     if ($PSScriptRoot) {
         $script:configPath = Resolve-Path $PSScriptRoot
     } else {
@@ -20,11 +20,20 @@ function Initialize-Setup {
 function Test-Confirmation {
     if (-not $Confirm) {
         Write-Host "Setup script will nuke userdir things linking them to $configPath. Type yes to continue." -ForegroundColor Red
-        $confirm = Read-Host -Prompt "Type yes to confirm:"
+        $confirm = Read-Host -Prompt "Type yes to confirm"
         if ($confirm -notlike "yes") {
             Write-Host "Aborted" -ForegroundColor Green
             throw "Aborted."
         }
+    }
+}
+
+function Enable-WindowsOptionalFeatures($Features) {
+    $neededFeatures = Get-WindowsOptionalFeature -Online | `
+        Where-Object { $_.State -eq "Disabled" -and $features.Contains($_.FeatureName) }
+
+    $neededFeatures | ForEach-Object {
+        Enable-WindowsOptionalFeature -Online -FeatureName $_.FeatureName
     }
 }
 
@@ -70,9 +79,23 @@ $VerbosePreference = "Continue"
 Initialize-Setup
 Test-Confirmation
 
+Enable-WindowsOptionalFeatures @(
+    "Microsoft-Windows-Subsystem-Linux",
+    "Microsoft-Hyper-V-All"
+)
+
+if (-not (Get-AppxPackage -Name "CanonicalGroupLimited.UbuntuonWindows")) {
+    $ubuntuAppx = ".\Ubuntu.appx"
+    if (-not (Test-Path $ubuntuAppx)) {
+        Invoke-WebRequest -Uri https://aka.ms/wsl-ubuntu-1804 -OutFile $ubuntuAppx -UseBasicParsing
+    }
+    Add-AppxPackage - $ubuntuAppx
+}
+
 Initialize-Symlinks @(
     @("$home\.ssh", "$configPath\ssh"),
-    @("$home\.aws", "$configPath\aws")
+    @("$home\.aws", "$configPath\aws"),
+    @("$home\.kube", "$configPath\kube")
 )
 
 Install-Chocolatey
@@ -103,6 +126,8 @@ Install-ChocolateyPackages @(
     # Utilities
     "7zip",
     "keepass",
+    "openssl.light",
+    "procexp",
     "putty",
     "winscp"
 )
@@ -115,10 +140,10 @@ if ($Chat) {
     )
 }
 
-Write-Host "Installing Azure PowerShell module"
-Install-Module -Name Az -AllowClobber -Scope CurrentUser -Force
-
-refreshenv
+if (-not (Get-Module -ListAvailable -Name "Az.Accounts")) {
+    Write-Host "Installing Azure PowerShell module"
+    Install-Module -Name Az -AllowClobber -Scope CurrentUser -Force
+}
 
 # NodeJS setup.
 Write-Host "Setting up nodejs"
