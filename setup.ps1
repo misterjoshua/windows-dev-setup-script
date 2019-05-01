@@ -89,7 +89,7 @@ if (-not (Get-AppxPackage -Name "CanonicalGroupLimited.UbuntuonWindows")) {
     if (-not (Test-Path $ubuntuAppx)) {
         Invoke-WebRequest -Uri https://aka.ms/wsl-ubuntu-1804 -OutFile $ubuntuAppx -UseBasicParsing
     }
-    Add-AppxPackage - $ubuntuAppx
+    Add-AppxPackage $ubuntuAppx
 }
 
 Initialize-Symlinks @(
