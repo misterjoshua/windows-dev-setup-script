@@ -38,7 +38,9 @@ function Enable-WindowsOptionalFeatures($Features) {
 }
 
 function Install-Chocolatey {
-    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+    if (-not [bool](choco -? >$null))  {
+        Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+    }
 }
 
 function Initialize-Symlinks ($Symlinks) {
@@ -62,9 +64,16 @@ function Initialize-Symlinks ($Symlinks) {
 }
 
 function Install-ChocolateyPackages($Packages) {
+    $installed = choco list --local-only --id-only -r | ForEach-Object { $_.ToLower() }
+
     $Packages | ForEach-Object {
-        Write-Host "`n`n-= Installing choco package $_ =-`n" -ForegroundColor Cyan
-        choco install -r -y $_
+        if (-not $installed.Contains($_)) {
+            Write-Host "`n`n-= Installing choco package $_ =-`n" -ForegroundColor Cyan
+            choco install -r -y $_
+        }
+        else {
+            Write-Host "`n`n-= Already installed choco package $_ =-`n" -ForegroundColor Cyan
+        }
     }
 }
 
@@ -105,9 +114,11 @@ Install-ChocolateyPackages @(
     "jdk11",
     "jdk8",
     "nodejs",
+    "php",
     "python",
 
     # Dev tools
+    "composer",
     "git",
     "gradle",
     "jetbrainstoolbox",
@@ -131,6 +142,11 @@ Install-ChocolateyPackages @(
     "putty",
     "winscp"
 )
+
+$chocoTools = "c:\tools"
+$chocoPhp73 = "$chocoTools\php73"
+Copy-Item -Path "$configPath\php\php73.ini" -Destination "$chocoPhp73\php.ini"
+Copy-Item -Path "$configPath\php\php_xdebug-2.7.1-7.3-vc15-nts-x86_64.dll" -Destination "$chocoPhp73\ext\php_xdebug.dll"
 
 if ($Chat) {
     # Chat programs.
