@@ -3,28 +3,93 @@ param(
     [switch] $Chat
 )
 
-function Initialize-Setup {
-    If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")){
-        $arguments = "& '" + $myinvocation.mycommand.definition + "'"
-        Start-Process powershell -Verb runAs -ArgumentList $arguments
-        exit 0
+function Invoke-Main {
+    Initialize-Setup
+    
+    Enable-WindowsOptionalFeatures @(
+        "Microsoft-Windows-Subsystem-Linux",
+        "Microsoft-Hyper-V-All"
+    )
+    
+    if (-not (Get-AppxPackage -Name "CanonicalGroupLimited.UbuntuonWindows")) {
+        $ubuntuAppx = ".\Ubuntu.appx"
+        if (-not (Test-Path $ubuntuAppx)) {
+            Invoke-WebRequest -Uri https://aka.ms/wsl-ubuntu-1804 -OutFile $ubuntuAppx -UseBasicParsing
+        }
+        Add-AppxPackage $ubuntuAppx
     }
+    
+    Initialize-Symlinks @(
+        @("$home\.ssh", "$configPath\ssh"),
+        @("$home\.aws", "$configPath\aws"),
+        @("$home\.kube", "$configPath\kube")
+    )
+    
+    Install-Chocolatey
+    Install-ChocolateyPackages @(
+        # Frameworks
+        "golang",
+        "jdk11",
+        "jdk8",
+        "nodejs",
+        "php",
+        "python",
+    
+        # Dev tools
+        "composer",
+        "git",
+        "gradle",
+        "jetbrainstoolbox",
+        "vscode",
+    
+        # Deployment tools
+        "awscli",
+        "awstools.powershell",
+        "azure-cli",
+        "docker-desktop",
+        "kubernetes-helm",
+        "heroku-cli",
+        "packer",
+        "terraform",
+    
+        # Utilities
+        "7zip",
+        "keepass",
+        "openssl.light",
+        "procexp",
+        "putty",
+        "sourcecodepro",
+        "winscp"
+    )
+    
+    $chocoTools = "c:\tools"
+    $chocoPhp73 = "$chocoTools\php73"
+    Copy-Item -Path "$configPath\php\php73.ini" -Destination "$chocoPhp73\php.ini"
+    Copy-Item -Path "$configPath\php\php_xdebug-2.7.1-7.3-vc15-nts-x86_64.dll" -Destination "$chocoPhp73\ext\php_xdebug.dll"
+    
+    if ($Chat) {
+        # Chat programs.
+        Install-ChocolateyPackages @(
+            "slack",
+            "skype"
+        )
+    }
+    
+    if (-not (Get-Module -ListAvailable -Name "Az.Accounts")) {
+        Write-Host "Installing Azure PowerShell module"
+        Install-Module -Name Az -AllowClobber -Scope CurrentUser -Force
+    }
+    
+    # NodeJS setup.
+    Write-Host "Setting up nodejs"
+    npm install -g yarn create-react-app
+}
 
+function Initialize-Setup {
     if ($PSScriptRoot) {
         $script:configPath = Resolve-Path $PSScriptRoot
     } else {
         $script:configPath = Resolve-Path .
-    }
-}
-
-function Test-Confirmation {
-    if (-not $Confirm) {
-        Write-Host "Setup script will nuke userdir things linking them to $configPath. Type yes to continue." -ForegroundColor Red
-        $confirm = Read-Host -Prompt "Type yes to confirm"
-        if ($confirm -notlike "yes") {
-            Write-Host "Aborted" -ForegroundColor Green
-            throw "Aborted."
-        }
     }
 }
 
@@ -85,82 +150,10 @@ function Install-ChocolateyPackages($Packages) {
 $ErrorActionPreference = "Stop"
 $VerbosePreference = "Continue"
 
-Initialize-Setup
-Test-Confirmation
-
-Enable-WindowsOptionalFeatures @(
-    "Microsoft-Windows-Subsystem-Linux",
-    "Microsoft-Hyper-V-All"
-)
-
-if (-not (Get-AppxPackage -Name "CanonicalGroupLimited.UbuntuonWindows")) {
-    $ubuntuAppx = ".\Ubuntu.appx"
-    if (-not (Test-Path $ubuntuAppx)) {
-        Invoke-WebRequest -Uri https://aka.ms/wsl-ubuntu-1804 -OutFile $ubuntuAppx -UseBasicParsing
-    }
-    Add-AppxPackage $ubuntuAppx
+If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")){
+    $arguments = "& '" + $myinvocation.mycommand.definition + "'"
+    Start-Process powershell -Verb runAs -ArgumentList $arguments
+    exit 0
 }
 
-Initialize-Symlinks @(
-    @("$home\.ssh", "$configPath\ssh"),
-    @("$home\.aws", "$configPath\aws"),
-    @("$home\.kube", "$configPath\kube")
-)
-
-Install-Chocolatey
-Install-ChocolateyPackages @(
-    # Frameworks
-    "golang",
-    "jdk11",
-    "jdk8",
-    "nodejs",
-    "php",
-    "python",
-
-    # Dev tools
-    "composer",
-    "git",
-    "gradle",
-    "jetbrainstoolbox",
-    "vscode",
-
-    # Deployment tools
-    "awscli",
-    "awstools.powershell",
-    "azure-cli",
-    "docker-desktop",
-    "kubernetes-helm",
-    "heroku-cli",
-    "packer",
-    "terraform",
-
-    # Utilities
-    "7zip",
-    "keepass",
-    "openssl.light",
-    "procexp",
-    "putty",
-    "winscp"
-)
-
-$chocoTools = "c:\tools"
-$chocoPhp73 = "$chocoTools\php73"
-Copy-Item -Path "$configPath\php\php73.ini" -Destination "$chocoPhp73\php.ini"
-Copy-Item -Path "$configPath\php\php_xdebug-2.7.1-7.3-vc15-nts-x86_64.dll" -Destination "$chocoPhp73\ext\php_xdebug.dll"
-
-if ($Chat) {
-    # Chat programs.
-    Install-ChocolateyPackages @(
-        "slack",
-        "skype"
-    )
-}
-
-if (-not (Get-Module -ListAvailable -Name "Az.Accounts")) {
-    Write-Host "Installing Azure PowerShell module"
-    Install-Module -Name Az -AllowClobber -Scope CurrentUser -Force
-}
-
-# NodeJS setup.
-Write-Host "Setting up nodejs"
-npm install -g yarn create-react-app
+Invoke-Main
