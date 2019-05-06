@@ -133,11 +133,12 @@ function Install-ChocolateyPackages($Packages) {
 
     $Packages | ForEach-Object {
         if (-not $installed.Contains($_)) {
-            Write-Host "`n`n-= Installing choco package $_ =-`n" -ForegroundColor Cyan
+            Write-Host "-= Installing choco package $_ =-`n" -ForegroundColor Cyan
             choco install -r -y $_
+            Write-Host "`n`n"
         }
         else {
-            Write-Host "`n`n-= Already installed choco package $_ =-`n" -ForegroundColor Cyan
+            Write-Host "-= Already installed choco package $_ =-`n" -ForegroundColor Cyan
         }
     }
 }
