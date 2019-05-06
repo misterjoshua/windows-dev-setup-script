@@ -59,6 +59,7 @@ function Invoke-Main {
         "procexp",
         "putty",
         "sourcecodepro",
+        "vcxsrv",
         "winscp"
     )
     
