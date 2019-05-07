@@ -58,6 +58,7 @@ function Invoke-Main {
         "openssl.light",
         "procexp",
         "putty",
+        "restic",
         "sourcecodepro",
         "vcxsrv",
         "winscp"
