@@ -84,7 +84,7 @@ function Invoke-Main {
     
     # NodeJS setup.
     Write-Host "Setting up nodejs"
-    npm install -g yarn create-react-app
+    npm install -g yarn create-react-app serverless
 }
 
 function Initialize-Setup {
